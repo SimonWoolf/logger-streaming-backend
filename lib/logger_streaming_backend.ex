@@ -1,6 +1,6 @@
 defmodule LoggerStreamingBackend do
   use GenEvent
-  defstruct default_level: nil, metadata: nil, separator: nil, handlers: nil, prior_global_level: nil
+  defstruct default_level: nil, metadata: nil, separator: nil, handlers: nil, prior_global_level: nil, formatter: nil
 
   def init(__MODULE__) do
     {:ok, configure_defaults([])}
@@ -26,10 +26,10 @@ defmodule LoggerStreamingBackend do
     {:ok, state}
   end
 
-  def handle_event({level, _gl, {Logger, msg, timestamp, metadata}}, state = %{handlers: handlers, metadata: keys}) do
+  def handle_event({level, _gl, {Logger, msg, timestamp, metadata}}, state = %{handlers: handlers, metadata: keys, formatter: formatter}) do
     for handler <- handlers do
       if should_log(level, handler.level, metadata, handler.metadata_filter) do
-        message = LoggerStreamingBackend.Html.format(level, msg, timestamp, take_metadata(metadata, keys))
+        message = formatter.format(level, msg, timestamp, take_metadata(metadata, keys))
         send(handler.pid, {:log, message})
       end
     end
@@ -59,7 +59,8 @@ defmodule LoggerStreamingBackend do
        default_level: config[:level] || :debug,
        metadata: config[:metadata] || [],
        separator: config[:separator] || ":",
-       handlers: config[:handlers] || []
+       handlers: config[:handlers] || [],
+       formatter: config[:formatter] || LoggerStreamingBackend.Html
      }
   end
 

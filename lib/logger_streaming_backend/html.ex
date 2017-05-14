@@ -12,6 +12,7 @@ defmodule LoggerStreamingBackend.Html do
     end
   end
 
+  @spec format(atom(), String.t, {tuple(), tuple()}, Keyword.t) :: String.t
   def format(level, message, {_date, time}, metadata) do
     {:safe, msg} = log_template(
       message: message,
