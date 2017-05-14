@@ -127,7 +127,8 @@ defmodule LoggerStreamingBackend do
 
       key && fn(metadata) ->
         Enum.any?(metadata, fn
-         {^key, ^value} -> true
+           {^key, v} ->
+             to_string(v) == value
          _ -> false
         end)
       end
