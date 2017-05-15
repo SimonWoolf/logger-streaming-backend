@@ -64,10 +64,13 @@ config :logger, LoggerStreamingBackend,
 
 The HttpStreamHandler supports an `:additional_headers` option if you'd like
 to add your own headers to the defaults, or a `:headers` option to replace
-the defaults. E.g.:
+the defaults, and a `:basic` option to use basic auth on the log endpoint. E.g.:
 
 ```elixir
-{"/path", LoggerStreamingBackend.HttpStreamHandler, [additional_headers: [{"X-Custom-Header", "foo"}]]}
+{"/path", LoggerStreamingBackend.HttpStreamHandler, [
+  additional_headers: [{"X-Custom-Header", "foo"}],
+  basic: {"username", "password"}
+]},
 ```
 
 Note that log level (and the metadata filter feature) are not part of the

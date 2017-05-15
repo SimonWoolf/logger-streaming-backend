@@ -1,5 +1,25 @@
 defmodule LoggerStreamingBackend.HttpStreamHandler do
   def init(_type, req, opts) do
+    if credentials = opts[:basic] do
+      if match?({:ok, {"basic", ^credentials}, _}, :cowboy_req.parse_header("authorization", req)) do
+        do_init(req, opts)
+      else
+        {:ok, req, opts[:realm] || "log"}
+      end
+    else
+      do_init(req, opts)
+    end
+  end
+
+  # Only used when failed basic auth
+  def handle(req, realm) do
+    {:ok, reply} = :cowboy_req.reply(401, [
+      {"Www-Authenticate", "Basic realm=\"#{realm}\""}
+    ], "Unauthorized", req)
+    {:ok, reply, nil}
+  end
+
+  def do_init(req, opts) do
     {level, req} = :cowboy_req.qs_val("level", req, nil)
     {scope, req} = :cowboy_req.qs_val("scope", req, nil)
 
@@ -15,7 +35,7 @@ defmodule LoggerStreamingBackend.HttpStreamHandler do
     # Sends html header, style, etc
     :cowboy_req.chunk(LoggerStreamingBackend.Html.header, req)
 
-    {:loop, req, :nostate}
+    {:loop, req, :added_handler}
   end
 
   def info({:log, message}, req, state) do
@@ -32,9 +52,11 @@ defmodule LoggerStreamingBackend.HttpStreamHandler do
     {:loop, req, state}
   end
 
-  def terminate(_reason, _req, _state) do
+  def terminate(_reason, _req, :added_handler) do
     Logger.configure_backend(LoggerStreamingBackend, [remove_handler: self()])
     :ok
   end
+
+  def terminate(_reason, _req, _), do: :ok
 end
 
