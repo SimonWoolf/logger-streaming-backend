@@ -159,7 +159,7 @@ defmodule LoggerStreamingBackend do
 
   defp add_handler(opts, state = %{prior_global_level: nil}) do
     # First handler added. Store the prior log level.
-    prior_global_level = Application.get_env(:logger, :level)
+    prior_global_level = Application.get_env(:logger, :level, :debug)
     add_handler(opts, %__MODULE__{state | prior_global_level: prior_global_level})
   end
 
@@ -254,6 +254,7 @@ defmodule LoggerStreamingBackend do
     state
   end
 
+  defp set_global_log_level(nil), do: nil
   defp set_global_log_level(level) when is_atom(level) do
     # Need to do this in a task because Logger.Config.configure is part of the
     # same GenEvent that this handler is in -- if we do a call directly, we'll
