@@ -2,6 +2,11 @@
 
 Backend for the Elixir `Logger` that streams logs over HTTP.
 
+- Specify the log level with a `level` querystring param (and it will change the global log level if necessary to acommodate while the stream is open).
+- Specify a `scope` to filter the log stream by metadata. E.g. in the below, adding `&scope=uuid:someuuid` would restrict the logs to only messages with that uuid in their custom metadata.
+
+![log](https://cloud.githubusercontent.com/assets/5908687/26052912/d61bfdc6-395e-11e7-9a38-3cc146766271.png)
+
 ## Installation
 
 To use, add to mix.exs:
