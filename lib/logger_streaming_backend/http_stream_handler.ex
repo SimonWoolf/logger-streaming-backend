@@ -1,21 +1,42 @@
 defmodule LoggerStreamingBackend.HttpStreamHandler do
   def init(_type, req, opts) do
-    if credentials = opts[:basic] do
-      if match?({:ok, {"basic", ^credentials}, _}, :cowboy_req.parse_header("authorization", req)) do
-        do_init(req, opts)
-      else
-        {:ok, req, opts[:realm] || "log"}
-      end
-    else
+    with :ok <- req_filter(req, opts),
+         :ok <- basic_auth(req, opts) do
       do_init(req, opts)
+    else
+      {:error, error} -> {:ok, req, error}
     end
   end
 
+  def basic_auth(req, opts = [basic: credentials]) do
+    if match?({:ok, {"basic", ^credentials}, _}, :cowboy_req.parse_header("authorization", req)) do
+      :ok
+    else
+      {:error, {:wwwauth, opts[:realm] || "log"}}
+    end
+  end
+
+  def req_filter(req, [req_filter: {filter, msg_if_refused}]) do
+    if filter.(req) do
+      :ok
+    else
+      {:error, {:refuse, msg_if_refused}}
+    end
+  end
+
+  def basic_auth(req, _), do: :ok
+  def req_filter(req, _), do: :ok
+
   # Only used when failed basic auth
-  def handle(req, realm) do
+  def handle(req, {:wwwauth, realm}) do
     {:ok, reply} = :cowboy_req.reply(401, [
       {"Www-Authenticate", "Basic realm=\"#{realm}\""}
     ], "Unauthorized", req)
+    {:ok, reply, nil}
+  end
+
+  def handle(req, {:refuse, msg_if_refused}) do
+    {:ok, reply} = :cowboy_req.reply(401, [], msg_if_refused, req)
     {:ok, reply, nil}
   end
 

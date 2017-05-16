@@ -49,9 +49,17 @@ defmodule LoggerStreamingBackend do
       config :logger, LoggerStreamingBackend,
         metadata: [:module, :line, :some_custom_key]
 
-  The HttpStreamHandler supports an `:additional_headers` option if you'd like
-  to add your own headers to the defaults, or a `:headers` option to replace
-  the defaults, and a `:basic` option to use basic auth on the log endpoint. E.g.:
+  The HttpStreamHandler supports the following options:
+
+   * `:additional_headers` (list of 2-tuples), if you'd like to add your own
+      headers to the defaults
+   * `:headers` (list of 2-tuples), to completely replace the defaults
+   * `:basic` (tuple of username and password) to use basic auth on the log
+      endpoint
+   * `:req_filter` (tuple of fn : req -> bool, and msg to return on failure)
+      for customisable auth
+
+  E.g.
 
       {"/path", LoggerStreamingBackend.HttpStreamHandler, [
         additional_headers: [{"X-Custom-Header", "foo"}],

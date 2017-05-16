@@ -85,6 +85,25 @@ defmodule LoggerStreamingBackendTest do
     flush()
   end
 
+  test "req filter, fails" do
+    id = stream_log("log_req_filter", [])
+    assert_receive %HTTPoison.AsyncStatus{code: 401}
+    assert_receive %HTTPoison.AsyncHeaders{headers: _}
+    assert_receive %HTTPoison.AsyncChunk{chunk: chunk}
+    assert String.contains? chunk, "failed-req-filter"
+
+    stop_stream(id)
+    flush()
+  end
+
+  test "req filter, passes" do
+    id = stream_log("log_req_filter", [arbitrary: "yay"])
+    assert_receive %HTTPoison.AsyncStatus{code: 200}
+
+    stop_stream(id)
+    flush()
+  end
+
   test "Only streams up to requested log level" do
     id = stream_log("log", [level: :warn])
     assert_receive %HTTPoison.AsyncStatus{code: 200}
@@ -145,6 +164,7 @@ defmodule LoggerStreamingBackendTest do
           {"/log", LoggerStreamingBackend.HttpStreamHandler, [additional_headers: [{"X-Additional-Header", "foo"}]]},
           {"/log_custom_headers", LoggerStreamingBackend.HttpStreamHandler, [headers: [{"X-Header", "foo"}]]},
           {"/log_basic_auth", LoggerStreamingBackend.HttpStreamHandler, [basic: basic_creds()]},
+          {"/log_req_filter", LoggerStreamingBackend.HttpStreamHandler, [req_filter: req_filter()]},
         ]
       }
     ])
@@ -171,6 +191,14 @@ defmodule LoggerStreamingBackendTest do
 
   defp basic_creds do
     {"username", "password"}
+  end
+
+  defp req_filter do
+    {fn(req) ->
+       {val, _} = :cowboy_req.qs_val("arbitrary", req, nil)
+       !!val
+     end,
+     "failed-req-filter"}
   end
 
   defp flush do
