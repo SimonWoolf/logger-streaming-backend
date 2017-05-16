@@ -104,6 +104,20 @@ defmodule LoggerStreamingBackendTest do
     flush()
   end
 
+  test "basic auth and req filter" do
+    id = stream_log("log_basic_auth_and_req_filter", [], basic_creds())
+    assert_receive %HTTPoison.AsyncStatus{code: 401}
+    stop_stream(id) && flush()
+
+    id = stream_log("log_basic_auth_and_req_filter", [arbitrary: "yay"])
+    assert_receive %HTTPoison.AsyncStatus{code: 401}
+    stop_stream(id) && flush()
+
+    id = stream_log("log_basic_auth_and_req_filter", [arbitrary: "yay"], basic_creds())
+    assert_receive %HTTPoison.AsyncStatus{code: 200}
+    stop_stream(id) && flush()
+  end
+
   test "Only streams up to requested log level" do
     id = stream_log("log", [level: :warn])
     assert_receive %HTTPoison.AsyncStatus{code: 200}
@@ -165,6 +179,7 @@ defmodule LoggerStreamingBackendTest do
           {"/log_custom_headers", LoggerStreamingBackend.HttpStreamHandler, [headers: [{"X-Header", "foo"}]]},
           {"/log_basic_auth", LoggerStreamingBackend.HttpStreamHandler, [basic: basic_creds()]},
           {"/log_req_filter", LoggerStreamingBackend.HttpStreamHandler, [req_filter: req_filter()]},
+          {"/log_basic_auth_and_req_filter", LoggerStreamingBackend.HttpStreamHandler, [req_filter: req_filter(), basic: basic_creds()]},
         ]
       }
     ])

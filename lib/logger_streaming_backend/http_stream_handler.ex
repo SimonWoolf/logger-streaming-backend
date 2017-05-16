@@ -1,5 +1,6 @@
 defmodule LoggerStreamingBackend.HttpStreamHandler do
   def init(_type, req, opts) do
+    opts= Enum.into(opts, Map.new) # so can pattern-match on them
     with :ok <- req_filter(req, opts),
          :ok <- basic_auth(req, opts) do
       do_init(req, opts)
@@ -8,24 +9,23 @@ defmodule LoggerStreamingBackend.HttpStreamHandler do
     end
   end
 
-  def basic_auth(req, opts = [basic: credentials]) do
+  def basic_auth(req, opts = %{basic: credentials}) do
     if match?({:ok, {"basic", ^credentials}, _}, :cowboy_req.parse_header("authorization", req)) do
       :ok
     else
       {:error, {:wwwauth, opts[:realm] || "log"}}
     end
   end
+  def basic_auth(_, _), do: :ok
 
-  def req_filter(req, [req_filter: {filter, msg_if_refused}]) do
+  def req_filter(req, %{req_filter: {filter, msg_if_refused}}) do
     if filter.(req) do
       :ok
     else
       {:error, {:refuse, msg_if_refused}}
     end
   end
-
-  def basic_auth(req, _), do: :ok
-  def req_filter(req, _), do: :ok
+  def req_filter(_, _), do: :ok
 
   # Only used when failed basic auth
   def handle(req, {:wwwauth, realm}) do
