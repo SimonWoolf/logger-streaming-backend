@@ -1,26 +1,26 @@
 defmodule LoggerStreamingBackend.Html do
   use Eml
-  use Eml.HTML
+  use Eml.Language.HTML
 
-  template log_template do
-    p [class: @level] do
-      span [class: "time"], @timestamp
-      span [class: "level"], @level
-      span [class: "metadata"], @metadata
-      br()
-      span [class: "message colorlevel"], @message
+  precompile log_template do
+    p [class: :level] do
+      span [class: "time"], :timestamp
+      span [class: "level"], :level
+      span [class: "metadata"], :metadata
+      br []
+      span [class: "message colorlevel"], :message
     end
   end
 
   @spec format(atom(), String.t, {tuple(), tuple()}, Keyword.t) :: String.t
   def format(level, message, {_date, time}, metadata) do
-    {:safe, msg} = log_template(
+    bound_template = log_template(
       message: message,
       level: Atom.to_string(level),
       timestamp: Logger.Utils.format_time(time) |> :erlang.list_to_binary,
       metadata: Logger.Formatter.format([:metadata], nil, nil, nil, metadata) |> :erlang.list_to_binary
     )
-    msg
+    Eml.render(bound_template)
   end
 
   def header do

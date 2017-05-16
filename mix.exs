@@ -33,8 +33,9 @@ defmodule LoggerStreamingBackend.Mixfile do
 
   defp deps do
     [
-      # ref is 0.9-dev. (eml doesn't use git tags, and last version released on hex is way old)
-      {:eml, github: "zambal/eml", ref: "074f2d8619947ae075a4f742c7579610276f96c1"},
+      # old, but the newest version on hex. when eml releases 0.9 to hex, can
+      # revert the commit to go back to this version
+      {:eml, "~> 0.7.1"},
       {:cowboy, "~> 1.0"},
       # dev deps
       {:ex_doc, "~> 0.15", only: :dev, runtime: false},
