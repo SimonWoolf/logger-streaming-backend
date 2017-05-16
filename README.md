@@ -9,7 +9,7 @@ Backend for the Elixir `Logger` that streams logs over HTTP.
 
 ## Installation
 
-To use, add to mix.exs:
+It's on hex as [`logger_streaming_backend`](https://hex.pm/packages/logger_streaming_backend), so can just add to mix.exs:
 
 ```elixir
 defp deps() do
