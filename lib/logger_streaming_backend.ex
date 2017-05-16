@@ -96,7 +96,7 @@ defmodule LoggerStreamingBackend do
   """
 
   use GenEvent
-  defstruct default_level: nil, metadata: nil, separator: nil, handlers: nil, prior_global_level: nil, formatter: nil
+  defstruct default_level: nil, metadata: nil, separator: nil, handlers: [], prior_global_level: nil, formatter: nil
 
   def init(__MODULE__) do
     {:ok, configure_defaults([])}
@@ -155,7 +155,6 @@ defmodule LoggerStreamingBackend do
        default_level: config[:level] || :debug,
        metadata: config[:metadata] || [],
        separator: config[:separator] || ":",
-       handlers: config[:handlers] || [],
        formatter: config[:formatter] || LoggerStreamingBackend.Html
      }
   end
