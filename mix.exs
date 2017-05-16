@@ -7,26 +7,30 @@ defmodule LoggerStreamingBackend.Mixfile do
      elixir: "~> 1.3", # due to use of `with` with else clause
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
+     description: description(),
+     package: package(),
+     source_url: "https://github.com/SimonWoolf/logger-streaming-backend",
      deps: deps()]
   end
 
-  # Configuration for the OTP application
-  #
-  # Type "mix help compile.app" for more information
   def application do
-    # Specify extra applications you'll use from Erlang/Elixir
     [extra_applications: [:logger]]
   end
 
-  # Dependencies can be Hex packages:
-  #
-  #   {:my_dep, "~> 0.3.0"}
-  #
-  # Or git/path repositories:
-  #
-  #   {:my_dep, git: "https://github.com/elixir-lang/my_dep.git", tag: "0.1.0"}
-  #
-  # Type "mix help deps" for more examples and options
+  defp description do
+    "A backend for the Elixir Logger that streams logs over HTTP, with per-stream log level and filtering based on metadata"
+  end
+
+  defp package do
+    [
+      maintainers: ["Simon Woolf, simon@simonwoolf.net"],
+      licenses: ["LGPL3+"],
+      links: %{
+        "github" => "https://github.com/SimonWoolf/logger-streaming-backend"
+      }
+    ]
+  end
+
   defp deps do
     [
       # ref is 0.9-dev. (eml doesn't use git tags, and last version released on hex is way old)
