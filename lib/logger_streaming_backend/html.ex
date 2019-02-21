@@ -15,7 +15,7 @@ defmodule LoggerStreamingBackend.Html do
   @spec format(atom(), String.t, {tuple(), tuple()}, Keyword.t) :: String.t
   def format(level, message, {_date, time}, metadata) do
     bound_template = log_template(
-      message: message,
+      message: IO.chardata_to_string(message),
       level: Atom.to_string(level),
       timestamp: Logger.Utils.format_time(time) |> :erlang.list_to_binary,
       metadata: Logger.Formatter.format([:metadata], nil, nil, nil, metadata) |> :erlang.list_to_binary
