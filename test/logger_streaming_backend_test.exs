@@ -39,7 +39,7 @@ defmodule LoggerStreamingBackendTest do
     Logger.error "error-log", some_metadata: "foo"
 
     assert_receive %HTTPoison.AsyncChunk{chunk: chunk}
-    assert String.starts_with? chunk, "<p class='error'>"
+    assert String.starts_with? chunk, "<p class=\"error\">"
     assert String.contains? chunk, "error-log"
     assert String.contains? chunk, "some_metadata=foo"
 
@@ -135,8 +135,8 @@ defmodule LoggerStreamingBackendTest do
     assert_receive %HTTPoison.AsyncChunk{chunk: second_chunk}
     refute_receive %HTTPoison.AsyncChunk{chunk: _}
 
-    assert String.starts_with? first_chunk, "<p class='error'>"
-    assert String.starts_with? second_chunk, "<p class='warn'>"
+    assert String.starts_with? first_chunk, "<p class=\"error\">"
+    assert String.starts_with? second_chunk, "<p class=\"warn\">"
 
     stop_stream(id)
     flush()
