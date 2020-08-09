@@ -3,7 +3,7 @@ defmodule LoggerStreamingBackend.Mixfile do
 
   def project do
     [app: :logger_streaming_backend,
-     version: "0.1.0",
+     version: "0.2.0-rc",
      elixir: "~> 1.3", # due to use of `with` with else clause
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
