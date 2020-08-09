@@ -17,7 +17,7 @@ defmodule LoggerStreamingBackend.Html do
     bound_template = log_template(
       message: IO.chardata_to_string(message),
       level: Atom.to_string(level),
-      timestamp: Logger.Utils.format_time(time) |> :erlang.list_to_binary,
+      timestamp: Logger.Formatter.format_time(time) |> :erlang.list_to_binary,
       metadata: Logger.Formatter.format([:metadata], nil, nil, nil, metadata) |> :erlang.list_to_binary
     )
     Eml.render(bound_template)
